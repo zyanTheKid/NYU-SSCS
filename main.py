@@ -2,32 +2,72 @@ import argparse
 from util import extract_public_key, verify_artifact_signature
 from merkle_proof import DefaultHasher, verify_consistency, verify_inclusion, compute_leaf_hash
 
+# Imports
+import json, requests, base64
+
+reckor = "https://rekor.sigstore.dev/api/v1"
+
 def get_log_entry(log_index, debug=False):
     # TODO: verify that log index value is sane
-    pass
+    url = requests.get(f"{reckor}/log/entries", params={"logIndex": log_index})
+    url.raise_for_status()
+    data = url.json()
+    uuid = list(data.keys())[0]
+    return data[uuid]
+    # pass
 
 def get_verification_proof(log_index, debug=False):
     # TODO: verify that log index value is sane
-    pass
+    entry = get_log_entry(log_index)
+    return entry["verification"]["inclusionProof"]
+    # pass
 
 def inclusion(log_index, artifact_filepath, debug=False):
     # TODO::
     # verify that log index and artifact filepath values are sane
-    # extract_public_key(certificate)
-    # verify_artifact_signature(signature, public_key, artifact_filepath)
-    # get_verification_proof(log_index)
-    # verify_inclusion(DefaultHasher, index, tree_size, leaf_hash, hashes, root_hash)
-    pass
+    entry = get_log_entry(log_index)
+    
+    body = json.loads(base64.b64decode(entry["body"]))
+    signature = base64.b64decode(body["spec"]["signature"]["content"])
+    certificate = base64.b64decode(body["spec"]["signature"]["publicKey"]["content"])
 
+    # extract_public_key(certificate)
+    publicKey = extract_public_key(certificate)
+
+    # verify_artifact_signature(signature, public_key, artifact_filepath)
+    verify_artifact_signature(signature, publicKey, artifact_filepath)
+
+    # get_verification_proof(log_index)
+    proof = entry["verification"]["inclusionProof"]
+    leafHash = compute_leaf_hash(entry["body"])
+
+    # verify_inclusion(DefaultHasher, index, tree_size, leaf_hash, hashes, root_hash)
+    verify_inclusion(DefaultHasher, proof["logIndex"], proof["treeSize"], leafHash, proof["hashes"], proof["rootHash"])
+    
+    print("Offline Verification Successful")
+    # pass
+    
 def get_latest_checkpoint(debug=False):
     # TODO: Fetch the latest checkpoint from rekor
-    pass
+    url = requests.get(f"{reckor}/log")
+    url.raise_for_status()
+    return url.json()
+    # pass
 
 def consistency(prev_checkpoint, debug=False):
     # TODO: 
     # verify that prev checkpoint is not empty
+    latestCheckpoint = get_latest_checkpoint()
+
     # get_latest_checkpoint()
-    pass
+    url = requests.get(f"{reckor}/log/proof", params={"firstSize": prev_checkpoint["treeSize"], "lastSize": latestCheckpoint["treeSize"], "treeId": prev_checkpoint["treeID"]})
+    url.raise_for_status()
+    proof = url.json()["hashes"]
+
+    verify_consistency(DefaultHasher, prev_checkpoint["treeSize"], latestCheckpoint["treeSize"], proof, prev_checkpoint["rootHash"], latestCheckpoint["rootHash"])
+
+    print("Consistency Verification Successful")
+    # pass
 
 def main():
     debug = False
