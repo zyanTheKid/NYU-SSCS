@@ -5,3 +5,4 @@ Tool-Outputs/
 *Halstead*.txt
 htmlcov/
 .coverage
+*.zip
