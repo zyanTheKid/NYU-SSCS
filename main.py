@@ -3,7 +3,7 @@ from util import extract_public_key, verify_artifact_signature
 from merkle_proof import DefaultHasher, verify_consistency, verify_inclusion, compute_leaf_hash
 
 # Imports
-import json, requests, base64
+import json, requests, base64, sys
 
 reckor = "https://rekor.sigstore.dev/api/v1"
 
@@ -35,7 +35,9 @@ def inclusion(log_index, artifact_filepath, debug=False):
     publicKey = extract_public_key(certificate)
 
     # verify_artifact_signature(signature, public_key, artifact_filepath)
-    verify_artifact_signature(signature, publicKey, artifact_filepath)
+    if not verify_artifact_signature(signature, publicKey, artifact_filepath):
+        print("Artifact signature verification failed")
+        sys.exit(1)
 
     # get_verification_proof(log_index)
     proof = entry["verification"]["inclusionProof"]
