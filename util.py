@@ -33,7 +33,12 @@ def extract_public_key(cert):
 
     return pem_public_key
 
-def verify_artifact_signature(signature, public_key, artifact_filename):
+def verify_artifact_signature(
+        signature: bytes, public_key: bytes, artifact_filename: str
+        ) -> bool:
+    """Verify an ECDSA-SHA256 signature over the artifact file.
+    Returns True if the signature is valid, False otherwise.
+    """
     # load the public key
     # with open("cert_public.pem", "rb") as pub_key_file:
     #    public_key = load_pem_public_key(pub_key_file.read())
@@ -43,6 +48,8 @@ def verify_artifact_signature(signature, public_key, artifact_filename):
     #        signature = sig_file.read()
 
     public_key = load_pem_public_key(public_key)
+    if not isinstance(public_key, ec.EllipticCurvePublicKey):
+        raise TypeError("The provided public key is not an ECDSA public key.")
     # load the data to be verified
     with open(artifact_filename, "rb") as data_file:
         data = data_file.read()
@@ -54,7 +61,9 @@ def verify_artifact_signature(signature, public_key, artifact_filename):
             data,
             ec.ECDSA(hashes.SHA256())
         )
-    except InvalidSignature as e:
+    except InvalidSignature:
         print("Signature is invalid")
-    except Exception as e:
-        print("Exception in verifying artifact signature:", e)
+        return False
+        # except Exception as e:
+        #     print("Exception in verifying artifact signature:", e)
+    return True
