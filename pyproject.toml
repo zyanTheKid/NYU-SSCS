@@ -23,20 +23,25 @@ target-version = "py314"
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "N", "UP", "BLE"]
 
+[tool.ruff.lint.per-file-ignores]
+# Tests use camelCase names for functions, variables and fixtures
+"Tests/*" = ["N802", "N803", "N806", "N816", "N999"]
+
 [tool.mypy]
 strict = true
 files = ["main.py", "merkle_proof.py", "util.py"]
 
 [tool.bandit]
-exclude_dirs = ["tests", ".venv"]
+exclude_dirs = ["Tests", ".venv"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["Tests"]
+python_files = ["test*.py"]
 pythonpath = ["."]
 addopts = "--cov=. --cov-report=term-missing --cov-report=html"
 
 [tool.coverage.run]
-omit = ["tests/*", "scripts/*"]
+omit = ["Tests/*", "scripts/*"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
