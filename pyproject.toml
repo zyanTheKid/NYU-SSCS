@@ -1,0 +1,55 @@
+[project]
+name = "python-rekor-monitor-template"
+version = "0.1.0"
+description = "Rekor Transparency Log Verifier"
+license = "MIT"
+authors = [
+    {name = "Atharva Pravin Pawar", email = "app7633@nyu.edu"}
+]
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "requests (>=2.34.2,<3.0.0)",
+    "cryptography (>=50.0.2,<51.0.0)"
+]
+
+[tool.poetry]
+package-mode = false
+
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "N", "UP", "BLE"]
+
+[tool.mypy]
+strict = true
+files = ["main.py", "merkle_proof.py", "util.py"]
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--cov=. --cov-report=term-missing --cov-report=html"
+
+[tool.coverage.run]
+omit = ["tests/*", "scripts/*"]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "ruff (>=0.17.0,<0.18.0)",
+    "mypy (>=2.4.0,<3.0.0)",
+    "bandit[toml] (>=1.9.4,<2.0.0)",
+    "pytest (>=9.1.1,<10.0.0)",
+    "pytest-cov (>=7.1.0,<8.0.0)",
+    "jsonschema (>=4.26.0,<5.0.0)",
+    "types-requests (>=2.33.0.20261006,<3.0.0.0)",
+    "radon (>=6.0.1,<7.0.0)"
+]
