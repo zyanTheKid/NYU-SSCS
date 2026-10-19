@@ -7,9 +7,11 @@ import json, requests, base64, sys
 
 reckor = "https://rekor.sigstore.dev/api/v1"
 
+REQUEST_TIMEOUT = 10  # seconds
+
 def get_log_entry(log_index, debug=False):
     # TODO: verify that log index value is sane
-    url = requests.get(f"{reckor}/log/entries", params={"logIndex": log_index})
+    url = requests.get(f"{reckor}/log/entries", params={"logIndex": log_index}, timeout=REQUEST_TIMEOUT)
     url.raise_for_status()
     data = url.json()
     uuid = list(data.keys())[0]
@@ -51,7 +53,7 @@ def inclusion(log_index, artifact_filepath, debug=False):
     
 def get_latest_checkpoint(debug=False):
     # TODO: Fetch the latest checkpoint from rekor
-    url = requests.get(f"{reckor}/log")
+    url = requests.get(f"{reckor}/log", timeout=REQUEST_TIMEOUT)
     url.raise_for_status()
     return url.json()
     # pass
@@ -62,7 +64,7 @@ def consistency(prev_checkpoint, debug=False):
     latestCheckpoint = get_latest_checkpoint()
 
     # get_latest_checkpoint()
-    url = requests.get(f"{reckor}/log/proof", params={"firstSize": prev_checkpoint["treeSize"], "lastSize": latestCheckpoint["treeSize"], "treeId": prev_checkpoint["treeID"]})
+    url = requests.get(f"{reckor}/log/proof", params={"firstSize": prev_checkpoint["treeSize"], "lastSize": latestCheckpoint["treeSize"], "treeId": prev_checkpoint["treeID"]}, timeout=REQUEST_TIMEOUT)
     url.raise_for_status()
     proof = url.json()["hashes"]
 
