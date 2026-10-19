@@ -97,6 +97,11 @@ def main():
     parser.add_argument('--root-hash', help='Root hash for consistency proof',
                         required=False)
     args = parser.parse_args()
+
+    # Validate argument combinations before doing any work
+    if args.inclusion is not None and not args.artifact:
+        parser.error("--inclusion requires --artifact")
+
     if args.debug:
         debug = True
         print("enabled debug mode")
@@ -109,14 +114,11 @@ def main():
         inclusion(args.inclusion, args.artifact, debug)
     if args.consistency:
         if not args.tree_id:
-            print("please specify tree id for prev checkpoint")
-            return
+           parser.error("--consistency requires --tree-id")
         if not args.tree_size:
-            print("please specify tree size for prev checkpoint")
-            return
+           parser.error("--consistency requires --tree-size")
         if not args.root_hash:
-            print("please specify root hash for prev checkpoint")
-            return
+           parser.error("--consistency requires --root-hash")
 
         prev_checkpoint = {}
         prev_checkpoint["treeID"] = args.tree_id
