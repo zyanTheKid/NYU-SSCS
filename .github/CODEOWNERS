@@ -1,0 +1,7 @@
+# Default owner for everything in the repo
+*            @zyanTheKid
+
+# Core verification logic
+/main.py         @zyanTheKid
+/merkle_proof.py @zyanTheKid
+/util.py         @zyanTheKid

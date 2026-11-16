@@ -1,0 +1,8 @@
+__pycache__/
+.venv/
+*_cache/
+Tool-Outputs/
+*Halstead*.txt
+htmlcov/
+.coverage
+*.zip
